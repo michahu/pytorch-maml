@@ -97,6 +97,8 @@ class ModelAgnosticMetaLearning(object):
                     for group in self.optimizer.param_groups])
 
     def get_outer_loss(self, batch):
+        # assert isinstance(batch, dict)
+        print('get_outer_loss')
         if 'test' not in batch:
             raise RuntimeError('The batch does not contain any test dataset.')
 
@@ -178,6 +180,7 @@ class ModelAgnosticMetaLearning(object):
                 pbar.set_postfix(**postfix)
 
     def train_iter(self, dataloader, max_batches=500):
+        print('got here')
         if self.optimizer is None:
             raise RuntimeError('Trying to call `train_iter`, while the '
                 'optimizer is `None`. In order to train `{0}`, you must '
