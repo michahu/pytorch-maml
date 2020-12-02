@@ -1,5 +1,7 @@
 # michahu stuff
 .vector_cache/
+wandb
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

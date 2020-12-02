@@ -4,6 +4,7 @@ import os
 import time
 import json
 import logging
+import wandb
 
 import torch.nn as nn
 
@@ -17,6 +18,8 @@ from maml.model import MetaMLPModel
 from maml.metalearners import ModelAgnosticMetaLearning
 
 def main(args):
+    wandb.init(project='meta-analogy')
+
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
     device = torch.device('cuda' if args.use_cuda
                           and torch.cuda.is_available() else 'cpu')
@@ -63,6 +66,7 @@ def main(args):
 
     model = MetaMLPModel(in_features=300, out_features=300, hidden_sizes=[500, 500])
     loss_function = nn.MSELoss()
+    wandb.watch(model)
 
     meta_optimizer = torch.optim.Adam(model.parameters(), lr=args.meta_lr)
     metalearner = ModelAgnosticMetaLearning(model,
@@ -87,6 +91,7 @@ def main(args):
                                        max_batches=args.num_batches,
                                        verbose=args.verbose,
                                        desc=epoch_desc.format(epoch + 1))
+        wandb.log({'results' : results})
 
         # Save best model
         if 'accuracies_after' in results:
@@ -102,6 +107,8 @@ def main(args):
         if save_model and (args.output_folder is not None):
             with open(args.model_path, 'wb') as f:
                 torch.save(model.state_dict(), f)
+
+    torch.save(model.state_dict(), os.path.join(wandb.run.dir, 'model.pt'))
 
     if hasattr(meta_train_dataset, 'close'):
         meta_train_dataset.close()
