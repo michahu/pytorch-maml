@@ -2,6 +2,10 @@
 .vector_cache/
 wandb
 .vscode
+output
+*.out
+*.slurm
+__pycache__
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
