@@ -5,6 +5,8 @@ import time
 import json
 import logging
 import wandb
+import random 
+import numpy as np
 
 import torch.nn as nn
 
@@ -18,6 +20,10 @@ from maml.model import MetaMLPModel
 from maml.metalearners import ModelAgnosticMetaLearning
 
 def main(args):
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
     wandb.init(project='meta-analogy')
     # print(args.use_cuda)
     # print(f'CUDA IS AVAILABLE: {torch.cuda.is_available()}')
@@ -68,8 +74,15 @@ def main(args):
                                               num_workers=args.num_workers,
                                               pin_memory=True)
 
-    # model = MetaMLPModel(in_features=300, out_features=300, hidden_sizes=[500])
-    model = MetaLinear(in_features=300, out_features=300)
+    if args.model_type == 'linear':
+        model = MetaLinear(in_features=300, out_features=300)
+    elif args.model_type == 'mlp1':
+        model = MetaMLPModel(in_features=300, out_features=300, hidden_sizes=[500])
+    elif args.model_type == 'mlp2':
+        model = MetaMLPModel(in_features=300, out_features=300, hidden_sizes=[500, 500])
+    else:
+        raise ValueError('unrecognized model type')
+
     loss_function = nn.MSELoss()
     wandb.watch(model)
 
@@ -128,15 +141,19 @@ if __name__ == '__main__':
     # General
     # parser.add_argument('folder', type=str,
     #     help='Path to the folder the data is downloaded to.')
+    parser.add_argument('--seed', type=int, default=42,
+        help='Random seed for reproducibility')
     parser.add_argument('--output-folder', type=str, default=None,
         help='Path to the output folder to save the model.')
-    parser.add_argument('--num-shots', type=int, default=16,
+    parser.add_argument('--num-shots', type=int, default=8,
         help='Number of training example per class (k in "k-shot", default: 5).')
     parser.add_argument('--num-shots-test', type=int, default=16,
         help='Number of test example per class. If negative, same as the number '
         'of training examples `--num-shots` (default: 15).')
 
     # Model
+    parser.add_argument('--model-type', type=str, default='linear',
+        help='choose amongst linear, mlp1, and mlp2')
     parser.add_argument('--hidden-size', type=int, default=64,
         help='Number of channels in each convolution layer of the VGG network '
         '(default: 64).')
