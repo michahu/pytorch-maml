@@ -19,6 +19,10 @@ from maml.metalearners import ModelAgnosticMetaLearning
 
 def main(args):
     wandb.init(project='meta-analogy')
+    # print(args.use_cuda)
+    # print(f'CUDA IS AVAILABLE: {torch.cuda.is_available()}')
+    # assert args.use_cuda
+    # assert torch.cuda.is_available()
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
     device = torch.device('cuda' if args.use_cuda
@@ -34,7 +38,7 @@ def main(args):
         os.makedirs(folder)
         logging.debug('Creating folder `{0}`'.format(folder))
 
-        args.folder = os.path.abspath(args.folder)
+        # args.folder = os.path.abspath(args.folder)
         args.model_path = os.path.abspath(os.path.join(folder, 'model.th'))
         # Save the configuration in a config.json file
         with open(os.path.join(folder, 'config.json'), 'w') as f:
@@ -64,7 +68,8 @@ def main(args):
                                               num_workers=args.num_workers,
                                               pin_memory=True)
 
-    model = MetaMLPModel(in_features=300, out_features=300, hidden_sizes=[500, 500])
+    # model = MetaMLPModel(in_features=300, out_features=300, hidden_sizes=[500])
+    model = MetaLinear(in_features=300, out_features=300)
     loss_function = nn.MSELoss()
     wandb.watch(model)
 
@@ -125,9 +130,9 @@ if __name__ == '__main__':
     #     help='Path to the folder the data is downloaded to.')
     parser.add_argument('--output-folder', type=str, default=None,
         help='Path to the output folder to save the model.')
-    parser.add_argument('--num-shots', type=int, default=5,
+    parser.add_argument('--num-shots', type=int, default=16,
         help='Number of training example per class (k in "k-shot", default: 5).')
-    parser.add_argument('--num-shots-test', type=int, default=15,
+    parser.add_argument('--num-shots-test', type=int, default=16,
         help='Number of test example per class. If negative, same as the number '
         'of training examples `--num-shots` (default: 15).')
 
@@ -137,7 +142,7 @@ if __name__ == '__main__':
         '(default: 64).')
 
     # Optimization
-    parser.add_argument('--batch-size', type=int, default=32,
+    parser.add_argument('--batch-size', type=int, default=64,
         help='Number of tasks in a batch of tasks (default: 25).')
     parser.add_argument('--num-steps', type=int, default=1,
         help='Number of fast adaptation steps, ie. gradient descent '
