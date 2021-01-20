@@ -8,7 +8,7 @@ import numpy as np
 import os, random
 
 class Analogy(MetaDataset):
-    def __init__(self, num_tasks=59, target_transform=None, dataset_transform=None):
+    def __init__(self, num_tasks=99, target_transform=None, dataset_transform=None):
         super(Analogy, self).__init__(meta_split='train',
             target_transform=target_transform,
             dataset_transform=dataset_transform)
