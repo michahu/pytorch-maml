@@ -40,7 +40,7 @@ def main(args):
             logging.debug('Creating folder `{0}`'.format(args.output_folder))
 
         folder = os.path.join(args.output_folder,
-                              time.strftime('%Y-%m-%d_%H%M%S'))
+                              time.strftime('%Y-%m-%d_%H%M%S')+args.model_type)
         os.makedirs(folder)
         logging.debug('Creating folder `{0}`'.format(folder))
 
@@ -125,8 +125,7 @@ def main(args):
         if save_model and (args.output_folder is not None):
             with open(args.model_path, 'wb') as f:
                 torch.save(model.state_dict(), f)
-
-    torch.save(model.state_dict(), os.path.join(wandb.run.dir, 'model.pt'))
+                torch.save(model.state_dict(), os.path.join(wandb.run.dir, 'model.pt'))
 
     if hasattr(meta_train_dataset, 'close'):
         meta_train_dataset.close()
